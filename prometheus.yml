@@ -1,0 +1,27 @@
+# my global config
+global:
+  scrape_interval: 1s # Set the scrape interval to every 1 second. Default is every 1 minute.
+  evaluation_interval: 1s # Evaluate rules every 1 second. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+scrape_configs:
+  # system level metrics (CPU/RAM/Disk) from node_exporter.
+  - job_name: "node"
+    scrape_interval: 1s
+    static_configs:
+      - targets: ["localhost:9100"]
+
+  # the streamlit captioning app, metrics served by prometheus_client (see app.py).
+  - job_name: "caption_app"
+    scrape_interval: 1s
+    static_configs:
+      - targets: ["localhost:18000"]
+
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "prometheus"
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+      - targets: ["localhost:9090"]
