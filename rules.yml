@@ -1,0 +1,91 @@
+groups:
+  # recording rules: pre-computed series used by the alerts below and the Grafana dashboard.
+  # naming follows the prometheus convention level:metric:operation.
+  - name: node-records
+    rules:
+      - record: instance:node_cpu_busy:percent
+        expr: 100 * (1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[30s])))
+      - record: instance:node_memory_used:percent
+        expr: 100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)
+      - record: instance:node_root_disk_used:percent
+        expr: 100 * (1 - node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})
+
+  - name: caption-app-records
+    rules:
+      - record: mode:caption_images:rate1m
+        expr: sum by (mode) (rate(caption_images_processed_total[1m]))
+      - record: mode:caption_inference_seconds:p95_1m
+        expr: histogram_quantile(0.95, sum by (le, mode) (rate(caption_inference_seconds_bucket[1m])))
+      - record: mode:caption_errors:rate1m
+        expr: sum by (mode) (rate(caption_errors_total[1m]))
+
+  - name: caption-app-alerts
+    rules:
+      - alert: CaptionAppDown
+        expr: up{job="caption_app"} == 0
+        for: 10s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Caption app metrics endpoint is down"
+          description: "Prometheus could not scrape {{ $labels.instance }} for more than 10 seconds."
+
+      - alert: HighInferenceLatency
+        expr: mode:caption_inference_seconds:p95_1m > 3
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow captioning ({{ $labels.mode }} mode)"
+          description: "p95 inference time is {{ $value | printf \"%.2f\" }}s, above the 3s threshold."
+
+      # share of failed attempts (errors vs. successful + failed); no traffic gives NaN, which never fires.
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(caption_errors_total[2m]))
+            / (sum(rate(caption_images_processed_total[2m])) + sum(rate(caption_errors_total[2m])))
+            > 0.2
+        for: 10s
+        labels:
+          severity: warning
+        annotations:
+          summary: "More than 20% of caption attempts are failing"
+          description: "{{ $value | humanizePercentage }} of recent attempts failed (corrupt images, bad ZIPs or inference errors)."
+
+  - name: node-alerts
+    rules:
+      - alert: NodeExporterDown
+        expr: up{job="node"} == 0
+        for: 10s
+        labels:
+          severity: critical
+        annotations:
+          summary: "node_exporter is down"
+          description: "System metrics from {{ $labels.instance }} are missing for more than 10 seconds."
+
+      - alert: HighCPU
+        expr: instance:node_cpu_busy:percent > 80
+        for: 15s
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU busy above 80%"
+          description: "CPU on {{ $labels.instance }} is {{ $value | printf \"%.0f\" }}% busy, e.g. during a bulk upload."
+
+      - alert: HighMemory
+        expr: instance:node_memory_used:percent > 90
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Memory usage above 90%"
+          description: "Memory on {{ $labels.instance }} is {{ $value | printf \"%.0f\" }}% used."
+
+      - alert: RootDiskAlmostFull
+        expr: instance:node_root_disk_used:percent > 95
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Root disk above 95% full"
+          description: "/ on {{ $labels.instance }} is {{ $value | printf \"%.1f\" }}% full."

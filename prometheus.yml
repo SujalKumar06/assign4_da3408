@@ -4,6 +4,17 @@ global:
   evaluation_interval: 1s # Evaluate rules every 1 second. The default is every 1 minute.
   # scrape_timeout is set to the global default (10s).
 
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+           - 127.0.0.1:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  - "rules.yml"
+
 scrape_configs:
   # system level metrics (CPU/RAM/Disk) from node_exporter.
   - job_name: "node"
