@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Model / HF cache
+.cache/
+hf_cache/
+
+# Prometheus / Alertmanager / Grafana local data
+data/
+alertmanager-data/
+grafana-data/
+
+# Env / secrets
+.env
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+*.log
+*.tmp
