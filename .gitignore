@@ -25,3 +25,6 @@ grafana-data/
 
 *.log
 *.tmp
+
+# local test inputs (photos and zips)
+sample_images/
