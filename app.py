@@ -26,6 +26,7 @@ IMAGE_TYPES = ["jpg", "jpeg", "png", "webp", "bmp"]
 MAX_BULK_IMAGES = 50  # cap per ZIP so a single upload can't hog the CPU for too long.
 MAX_IMAGE_BYTES = 10 * 1024 * 1024  # skip ZIP entries larger than 10 MB (uncompressed).
 METRICS_PORT = 18000
+MODES = ("single", "bulk")
 
 # reason code (metric label) -> text shown in the UI.
 SKIP_REASONS = {
@@ -59,6 +60,19 @@ def start_metrics_server():
     metrics.build.info({'version': '0.1.0', 'model': MODEL_NAME, 'device': 'cpu',
                         'torch': torch.__version__, 'author': 'Sujal Kumar', 'builddate': 'October 2026'})
 
+    # export 0 for the label values known up front. a series that first appears with value 1
+    # is invisible to rate()/increase() in prometheus, so its first event would be missed.
+    for mode in MODES:
+        for metric in (metrics.active_requests, metrics.inference_seconds, metrics.image_pixels,
+                       metrics.upload_bytes, metrics.request_seconds, metrics.preprocess_seconds,
+                       metrics.caption_words):
+            metric.labels(mode=mode)
+        for error_type in ("invalid_image", "inference_error"):
+            metrics.errors.labels(mode=mode, error_type=error_type)
+    metrics.errors.labels(mode="bulk", error_type="bad_zip")
+    for reason in SKIP_REASONS:
+        metrics.zip_entries_skipped.labels(reason=reason)
+
 
 # load the model only once per process, streamlit reruns the script on every interaction.
 @st.cache_resource(show_spinner="Loading captioning model...")
@@ -90,6 +104,20 @@ def client_labels() -> dict:
         "client_ip": st.context.ip_address or "localhost",  # streamlit returns None for localhost.
         "session_id": ctx.session_id[:8] if ctx is not None else "unknown",
     }
+
+
+def init_session_metrics():
+    """Create this session's per-client series at 0 on its first run, for the same reason as in
+    start_metrics_server: otherwise the first request of every new session would be missed."""
+    if st.session_state.get("metrics_ready"):
+        return
+    client = client_labels()
+    browser = browser_name(st.context.headers.get("User-Agent", ""))
+    for mode in MODES:
+        metrics.requests.labels(mode=mode, browser=browser, **client)
+        for status in ("success", "failed"):
+            metrics.images_processed.labels(mode=mode, status=status, **client)
+    st.session_state.metrics_ready = True
 
 
 def record_request(mode: str, uploaded, client: dict):
@@ -289,6 +317,7 @@ st.title("CPU Image Captioning")
 st.caption(f"Model: `{MODEL_NAME}` running on CPU")
 
 start_metrics_server()
+init_session_metrics()
 processor, model = load_model()
 
 single_tab, bulk_tab = st.tabs(["Single image", "Bulk (ZIP)"])
