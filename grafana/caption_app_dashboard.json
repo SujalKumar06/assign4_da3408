@@ -21,12 +21,21 @@
         "enable": true,
         "expr": "sum(caption_active_requests{mode=\"bulk\"}) > 0",
         "hide": false,
-        "iconColor": "#E69F00",
+        "iconColor": "rgba(230, 159, 0, 0.45)",
         "name": "Bulk job running",
         "step": "5s",
         "textFormat": "",
         "titleFormat": "Bulk job running",
-        "useValueForTime": false
+        "useValueForTime": false,
+        "filter": {
+          "exclude": false,
+          "ids": [
+            40,
+            41,
+            42,
+            43
+          ]
+        }
       },
       {
         "name": "Alert firing",
@@ -64,7 +73,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "**Live health, load, latency, errors and machine cost of the CPU-only BLIP image-captioning app.** Read top to bottom: *is it up?* → *how much work?* → *how fast?* → *what failed?* → *what was sent, by whom?* → *what did it cost the machine?*  \n**Key (Okabe-Ito, colour-blind safe):** <span style=\"color:#0072B2\">■ single-image mode = solid line</span> · <span style=\"color:#E69F00\">■ bulk ZIP mode = dashed line</span> · **orange shaded bands = a bulk job is running** (shown on every chart, to line app spikes up with CPU/RAM). **Purple bands = an alert is firing.** X-axes are wall-clock time; every axis title gives the unit and the scale (all linear). **(range)** = total or mean over the selected time range. Hover one chart to see the same moment on all charts.",
+        "content": "**Live health, load, latency, errors and machine cost of the CPU-only BLIP image-captioning app.** Read top to bottom: *is it up?* → *how much work?* → *how fast?* → *what failed?* → *what was sent, by whom?* → *what did it cost the machine?*  \n**Key (Okabe-Ito, colour-blind safe):** <span style=\"color:#0072B2\">■ single-image mode = solid line</span> · <span style=\"color:#E69F00\">■ bulk ZIP mode = dashed line</span> · **orange shaded bands = a bulk job is running** (on the System charts, to line app work up with CPU, RAM, load and disk). **Purple bands = an alert is firing** (on every chart). X-axes are wall-clock time; every axis title gives the unit and the scale (all linear). **(range)** = total or mean over the selected time range. Hover one chart to see the same moment on all charts.",
         "mode": "markdown"
       },
       "title": "",
