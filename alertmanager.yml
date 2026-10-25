@@ -7,7 +7,7 @@ route:
 receivers:
   - name: 'web.hook'
     webhook_configs:
-      - url: 'https://webhook.site/REPLACE-WITH-YOUR-ID'  # TO BE CHANGED TO YOUR OWN WEBHOOK URL
+      - url: 'https://webhook.site/623a042a-241d-451c-9e35-e7e3d80c9a83'  # TO BE CHANGED TO YOUR OWN WEBHOOK URL
         send_resolved: true
 inhibit_rules:
   # while a critical alert fires, mute the warning-level alerts for the same target.
