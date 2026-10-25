@@ -29,18 +29,18 @@
         "useValueForTime": false
       },
       {
+        "name": "Alert firing",
         "datasource": {
           "type": "prometheus",
           "uid": "${datasource}"
         },
         "enable": true,
-        "expr": "up{job=\"caption_app\"} == 0",
         "hide": false,
-        "iconColor": "#D55E00",
-        "name": "App down",
+        "iconColor": "#CC79A7",
+        "expr": "ALERTS{alertstate=\"firing\"}",
         "step": "5s",
-        "textFormat": "",
-        "titleFormat": "Caption app DOWN",
+        "titleFormat": "{{alertname}}",
+        "textFormat": "{{severity}} alert",
         "useValueForTime": false
       }
     ]
@@ -64,7 +64,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "**Live health, load, latency, errors and machine cost of the CPU-only BLIP image-captioning app.** Read top to bottom: *is it up?* → *how much work?* → *how fast?* → *what failed?* → *what was sent, by whom?* → *what did it cost the machine?*  \n**Key (Okabe-Ito, colour-blind safe):** <span style=\"color:#0072B2\">■ single-image mode = solid line</span> · <span style=\"color:#E69F00\">■ bulk ZIP mode = dashed line</span> · **orange shaded bands = a bulk job is running** (shown on every chart, to line app spikes up with CPU/RAM). X-axes are wall-clock time; each y-axis title gives the unit and the scale (linear unless it says log). Hover one chart to see the same moment on all charts.",
+        "content": "**Live health, load, latency, errors and machine cost of the CPU-only BLIP image-captioning app.** Read top to bottom: *is it up?* → *how much work?* → *how fast?* → *what failed?* → *what was sent, by whom?* → *what did it cost the machine?*  \n**Key (Okabe-Ito, colour-blind safe):** <span style=\"color:#0072B2\">■ single-image mode = solid line</span> · <span style=\"color:#E69F00\">■ bulk ZIP mode = dashed line</span> · **orange shaded bands = a bulk job is running** (shown on every chart, to line app spikes up with CPU/RAM). **Purple bands = an alert is firing.** X-axes are wall-clock time; every axis title gives the unit and the scale (all linear). **(range)** = total or mean over the selected time range. Hover one chart to see the same moment on all charts.",
         "mode": "markdown"
       },
       "title": "",
@@ -83,6 +83,27 @@
       "panels": [],
       "title": "1 · Health: is the service up and ready?",
       "type": "row"
+    },
+    {
+      "id": 48,
+      "type": "text",
+      "title": "",
+      "transparent": true,
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 2
+      },
+      "options": {
+        "mode": "markdown",
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "Green UP / READY means Prometheus can scrape the app and node_exporter and the model is loaded. The timeline shows any outage; the alert tiles show what rules.yml is firing right now."
+      }
     },
     {
       "datasource": {
@@ -144,7 +165,7 @@
         "h": 4,
         "w": 3,
         "x": 0,
-        "y": 4
+        "y": 6
       },
       "id": 4,
       "options": {
@@ -240,7 +261,7 @@
         "h": 4,
         "w": 3,
         "x": 3,
-        "y": 4
+        "y": 6
       },
       "id": 5,
       "options": {
@@ -336,7 +357,7 @@
         "h": 4,
         "w": 3,
         "x": 6,
-        "y": 4
+        "y": 6
       },
       "id": 6,
       "options": {
@@ -394,7 +415,7 @@
         "h": 4,
         "w": 3,
         "x": 9,
-        "y": 4
+        "y": 6
       },
       "id": 7,
       "options": {
@@ -452,7 +473,7 @@
         "h": 4,
         "w": 3,
         "x": 12,
-        "y": 4
+        "y": 6
       },
       "id": 8,
       "options": {
@@ -510,7 +531,7 @@
         "h": 4,
         "w": 3,
         "x": 15,
-        "y": 4
+        "y": 6
       },
       "id": 9,
       "options": {
@@ -568,7 +589,7 @@
         "h": 4,
         "w": 3,
         "x": 18,
-        "y": 4
+        "y": 6
       },
       "id": 10,
       "options": {
@@ -601,7 +622,7 @@
           "refId": "A"
         }
       ],
-      "title": "Images captioned",
+      "title": "Images (range)",
       "type": "stat"
     },
     {
@@ -616,7 +637,30 @@
             "mode": "thresholds"
           },
           "decimals": 1,
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "none yet",
+                  "color": "#8C8C8C",
+                  "index": 0
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "none yet",
+                  "color": "#8C8C8C",
+                  "index": 1
+                }
+              }
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -642,7 +686,7 @@
         "h": 4,
         "w": 3,
         "x": 21,
-        "y": 4
+        "y": 6
       },
       "id": 11,
       "options": {
@@ -675,7 +719,7 @@
           "refId": "A"
         }
       ],
-      "title": "Failure share",
+      "title": "Failures (range)",
       "type": "stat"
     },
     {
@@ -726,10 +770,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
-        "w": 24,
+        "h": 5,
+        "w": 14,
         "x": 0,
-        "y": 8
+        "y": 10
       },
       "id": 12,
       "options": {
@@ -765,12 +809,234 @@
       "type": "state-timeline"
     },
     {
+      "id": 49,
+      "type": "stat",
+      "title": "Alerts firing",
+      "description": "Number of alerts from rules.yml firing right now (Prometheus ALERTS series). NONE when all is well.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 14,
+        "y": 10,
+        "w": 3,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)",
+          "legendFormat": "__auto",
+          "instant": true,
+          "range": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#009E73",
+                "value": null
+              },
+              {
+                "color": "#D55E00",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "NONE",
+                  "index": 0
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "wideLayout": true,
+        "showPercentChange": false
+      }
+    },
+    {
+      "id": 50,
+      "type": "table",
+      "title": "Firing alerts · name, severity and target",
+      "description": "Alerts from rules.yml that are firing right now, most severe first. Empty when nothing is firing. Alertmanager forwards the same alerts to the webhook.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 17,
+        "y": 10,
+        "w": 7,
+        "h": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "ALERTS{alertstate=\"firing\"}",
+          "legendFormat": "__auto",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "alertstate": true,
+              "job": true
+            },
+            "indexByName": {
+              "alertname": 0,
+              "severity": 1,
+              "instance": 2,
+              "mode": 3
+            },
+            "renameByName": {
+              "alertname": "Alert",
+              "severity": "Severity",
+              "instance": "Target",
+              "mode": "Mode"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          },
+          "noValue": "none firing"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "critical": {
+                        "color": "#D55E00",
+                        "index": 0
+                      },
+                      "warning": {
+                        "color": "#E69F00",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Target"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "—"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mode"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "—"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Severity",
+            "desc": false
+          }
+        ],
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "fields": ""
+        }
+      }
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 15
       },
       "id": 13,
       "panels": [],
@@ -782,7 +1048,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 16
       },
       "id": 14,
       "options": {
@@ -840,7 +1106,8 @@
             },
             "thresholdsStyle": {
               "mode": "off"
-            }
+            },
+            "axisSoftMax": 1
           },
           "min": 0,
           "thresholds": {
@@ -907,7 +1174,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 15
+        "y": 18
       },
       "id": 15,
       "options": {
@@ -984,7 +1251,8 @@
             },
             "thresholdsStyle": {
               "mode": "off"
-            }
+            },
+            "axisSoftMax": 1
           },
           "min": 0,
           "thresholds": {
@@ -1051,7 +1319,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 15
+        "y": 18
       },
       "id": 16,
       "options": {
@@ -1101,7 +1369,7 @@
           "custom": {
             "axisBorderShow": true,
             "axisCenteredZero": false,
-            "axisLabel": "count (linear)",
+            "axisLabel": "requests in flight (linear)",
             "axisPlacement": "left",
             "barAlignment": 0,
             "drawStyle": "line",
@@ -1128,7 +1396,8 @@
             },
             "thresholdsStyle": {
               "mode": "off"
-            }
+            },
+            "axisSoftMax": 1
           },
           "min": 0,
           "thresholds": {
@@ -1211,6 +1480,18 @@
                   ],
                   "fill": "dot"
                 }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "bulk images queued (linear)"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 10
               }
             ]
           }
@@ -1220,7 +1501,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 15
+        "y": 18
       },
       "id": 17,
       "options": {
@@ -1273,7 +1554,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 26
       },
       "id": 18,
       "panels": [],
@@ -1285,7 +1566,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 27
       },
       "id": 19,
       "options": {
@@ -1410,7 +1691,7 @@
         "h": 8,
         "w": 10,
         "x": 0,
-        "y": 26
+        "y": 29
       },
       "id": 20,
       "options": {
@@ -1496,7 +1777,7 @@
         "h": 8,
         "w": 8,
         "x": 10,
-        "y": 26
+        "y": 29
       },
       "id": 21,
       "options": {
@@ -1633,7 +1914,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 26
+        "y": 29
       },
       "id": 22,
       "options": {
@@ -1650,7 +1931,11 @@
         },
         "showPercentChange": false,
         "textMode": "value_and_name",
-        "wideLayout": true
+        "wideLayout": true,
+        "text": {
+          "titleSize": 18,
+          "valueSize": 40
+        }
       },
       "targets": [
         {
@@ -1722,7 +2007,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 30
+        "y": 33
       },
       "id": 23,
       "options": {
@@ -1739,7 +2024,11 @@
         },
         "showPercentChange": false,
         "textMode": "value_and_name",
-        "wideLayout": true
+        "wideLayout": true,
+        "text": {
+          "titleSize": 18,
+          "valueSize": 40
+        }
       },
       "targets": [
         {
@@ -1764,7 +2053,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 37
       },
       "id": 24,
       "panels": [],
@@ -1776,7 +2065,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 38
       },
       "id": 25,
       "options": {
@@ -1834,7 +2123,8 @@
             },
             "thresholdsStyle": {
               "mode": "off"
-            }
+            },
+            "axisSoftMax": 1
           },
           "min": 0,
           "thresholds": {
@@ -1926,7 +2216,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 37
+        "y": 40
       },
       "id": 26,
       "options": {
@@ -2024,7 +2314,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 37
+        "y": 40
       },
       "id": 27,
       "options": {
@@ -2064,44 +2354,76 @@
       "description": "Files inside uploaded ZIPs that were not captioned, by reason, over the selected range. Bar length and the number both show the count.",
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "fixedColor": "#CC79A7",
-            "mode": "fixed"
-          },
-          "decimals": 0,
+          "unit": "short",
           "min": 0,
-          "unit": "short"
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#CC79A7"
+          },
+          "custom": {
+            "axisLabel": "ZIP entries (linear)",
+            "axisPlacement": "left",
+            "axisBorderShow": true,
+            "fillOpacity": 85,
+            "gradientMode": "none",
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reason"
+            },
+            "properties": [
+              {
+                "id": "custom.axisLabel",
+                "value": "skip reason"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 37
+        "y": 40
       },
       "id": 28,
       "options": {
-        "displayMode": "basic",
-        "maxVizHeight": 28,
-        "minVizHeight": 16,
-        "minVizWidth": 8,
-        "namePlacement": "left",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "sizing": "auto",
+        "orientation": "vertical",
+        "xField": "reason",
+        "showValue": "always",
+        "stacking": "none",
+        "groupWidth": 0.75,
+        "barWidth": 0.9,
+        "barRadius": 0,
+        "fullHighlight": false,
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0,
         "text": {
-          "titleSize": 14,
-          "valueSize": 16
+          "valueSize": 12
         },
-        "valueMode": "text"
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "targets": [
         {
@@ -2117,9 +2439,29 @@
           "refId": "A"
         }
       ],
-      "title": "Skipped ZIP entries · by reason, in time range",
-      "transformations": [],
-      "type": "bargauge"
+      "title": "Skipped ZIP entries · by reason (range)",
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "reducers": [
+              "lastNotNull"
+            ],
+            "mode": "seriesToRows",
+            "includeTimeField": false
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Field": "reason",
+              "Last *": "entries"
+            }
+          }
+        }
+      ],
+      "type": "barchart"
     },
     {
       "collapsed": false,
@@ -2127,7 +2469,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 48
       },
       "id": 29,
       "panels": [],
@@ -2139,7 +2481,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 46
+        "y": 49
       },
       "id": 30,
       "options": {
@@ -2177,7 +2519,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 48
+        "y": 51
       },
       "id": 31,
       "options": {
@@ -2211,7 +2553,7 @@
           "refId": "A"
         }
       ],
-      "title": "Clients · requests per IP, session, browser and mode (time range)",
+      "title": "Clients · requests per IP, session, browser and mode (range)",
       "transformations": [
         {
           "id": "organize",
@@ -2319,7 +2661,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 48
+        "y": 51
       },
       "id": 32,
       "options": {
@@ -2434,7 +2776,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 56
+        "y": 59
       },
       "id": 33,
       "options": {
@@ -2569,7 +2911,7 @@
         "h": 4,
         "w": 8,
         "x": 8,
-        "y": 56
+        "y": 59
       },
       "id": 34,
       "options": {
@@ -2586,7 +2928,11 @@
         },
         "showPercentChange": false,
         "textMode": "value_and_name",
-        "wideLayout": true
+        "wideLayout": true,
+        "text": {
+          "titleSize": 18,
+          "valueSize": 40
+        }
       },
       "targets": [
         {
@@ -2610,95 +2956,6 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "Mean number of words per generated caption over the selected range (caption_length_words summary). A sudden drop would hint at degenerate model output.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "text",
-            "mode": "fixed"
-          },
-          "decimals": 1,
-          "mappings": [],
-          "unit": "short"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "single"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#0072B2",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "bulk"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#E69F00",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 8,
-        "y": 60
-      },
-      "id": 35,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value_and_name",
-        "wideLayout": true
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "(sum by (mode) (increase(caption_length_words_sum[$__range])) / sum by (mode) (increase(caption_length_words_count[$__range]))) > 0",
-          "format": "time_series",
-          "instant": true,
-          "legendFormat": "{{mode}}",
-          "range": false,
-          "refId": "A"
-        }
-      ],
-      "title": "Caption length · mean words (range)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
       "description": "Average number of images queued per uploaded ZIP over the selected range (histogram _sum / _count). The app caps a ZIP at 50 images.",
       "fieldConfig": {
         "defaults": {
@@ -2708,7 +2965,7 @@
           },
           "decimals": 1,
           "mappings": [],
-          "unit": "short"
+          "unit": "suffix: images"
         },
         "overrides": []
       },
@@ -2716,7 +2973,7 @@
         "h": 4,
         "w": 8,
         "x": 16,
-        "y": 56
+        "y": 59
       },
       "id": 36,
       "options": {
@@ -2757,6 +3014,99 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
+      "description": "Mean number of words per generated caption over the selected range (caption_length_words summary). A sudden drop would hint at degenerate model output.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "unit": "suffix: words"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "single"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#0072B2",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "bulk"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E69F00",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 63
+      },
+      "id": 35,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true,
+        "text": {
+          "titleSize": 18,
+          "valueSize": 40
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "(sum by (mode) (increase(caption_length_words_sum[$__range])) / sum by (mode) (increase(caption_length_words_count[$__range]))) > 0",
+          "format": "time_series",
+          "instant": true,
+          "legendFormat": "{{mode}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Caption length · mean words (range)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
       "description": "Number of ZIP uploads that were processed over the selected range (caption_bulk_batch_images_count).",
       "fieldConfig": {
         "defaults": {
@@ -2766,7 +3116,7 @@
           },
           "decimals": 0,
           "mappings": [],
-          "unit": "short"
+          "unit": "suffix: ZIPs"
         },
         "overrides": []
       },
@@ -2774,7 +3124,7 @@
         "h": 4,
         "w": 8,
         "x": 16,
-        "y": 60
+        "y": 63
       },
       "id": 37,
       "options": {
@@ -2816,7 +3166,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 64
+        "y": 67
       },
       "id": 38,
       "panels": [],
@@ -2828,7 +3178,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 65
+        "y": 68
       },
       "id": 39,
       "options": {
@@ -2837,7 +3187,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "Corroboration: CPU and the app's own CPU climb inside the orange bulk bands, together with images/s (right axis). RAM stays flat because the model is loaded once.",
+        "content": "Corroboration: inside the orange bulk bands the machine CPU, the app's own CPU and bulk images/s (right axis) rise and fall together. Machine RAM stays roughly flat because the model is loaded once; the app's own memory grows a little during bulk jobs.",
         "mode": "markdown"
       },
       "title": "",
@@ -3002,7 +3352,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 67
+        "y": 70
       },
       "id": 40,
       "options": {
@@ -3190,7 +3540,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 67
+        "y": 70
       },
       "id": 41,
       "options": {
@@ -3346,7 +3696,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 76
+        "y": 79
       },
       "id": 42,
       "options": {
@@ -3502,7 +3852,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 76
+        "y": 79
       },
       "id": 43,
       "options": {
@@ -3587,7 +3937,7 @@
         "h": 4,
         "w": 4,
         "x": 16,
-        "y": 76
+        "y": 79
       },
       "id": 44,
       "options": {
@@ -3645,7 +3995,7 @@
         "h": 4,
         "w": 4,
         "x": 20,
-        "y": 76
+        "y": 79
       },
       "id": 45,
       "options": {
@@ -3703,7 +4053,7 @@
         "h": 4,
         "w": 4,
         "x": 16,
-        "y": 80
+        "y": 83
       },
       "id": 46,
       "options": {
@@ -3761,7 +4111,7 @@
         "h": 4,
         "w": 4,
         "x": 20,
-        "y": 80
+        "y": 83
       },
       "id": 47,
       "options": {
