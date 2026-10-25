@@ -2,7 +2,7 @@
 #
 # These live in their own module because streamlit reruns app.py on every interaction,
 # while a module is imported only once per process, so each metric is registered once.
-# NOTE: streamlit re-imports this module if it is edited while the app runs, restart the app after editing.
+# NOTE: file watching is off (.streamlit/config.toml), so restart the app after editing any source file.
 
 from prometheus_client import Counter, Gauge, Histogram, Info, Summary
 from prometheus_client import disable_created_metrics

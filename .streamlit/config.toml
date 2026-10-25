@@ -1,0 +1,5 @@
+[server]
+# Streamlit's file watcher scans every loaded module after each run. On transformers' lazily
+# loaded modules that imports hundreds of unrelated model files and logs a torchvision
+# ModuleNotFoundError for each. Turning it off only disables auto-reload on save.
+fileWatcherType = "none"
